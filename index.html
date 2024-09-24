@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام مبيعات وتخزين منتجات</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            background-color: #f9f9f9;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .product-list, .bill, .sales {
+            margin: 20px 0;
+        }
+        h2, h3 {
+            color: #333;
+        }
+        h3 {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+        .product-item, .bill-item, .sale-item {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .product-item {
+            background-color: #f0f8ff;
+        }
+        .total {
+            font-size: 1.5em;
+            color: #007bff;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        .center-text {
+            text-align: center;
+        }
+
+        .sales-list {
+    margin-top: 20px;
+}
+
+.sales-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sales-list th, .sales-list td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.sales-list th {
+    background-color: #007bff;
+    color: white;
+}
+
+.sales-list td {
+    background-color: #f9f9f9;
+}
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 class="center-text">نظام مبيعات وتخزين منتجات</h2>
+
+        <!-- قائمة المنتجات -->
+        <div class="product-list">
+            <h3>المنتجات المتاحة</h3>
+            <div id="product-items">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>معرف المنتج</th>
+                            <th>اسم المنتج</th>
+                            <th>السعر</th>
+                            <th>الكمية المتاحة</th>
+                            <th>إضافة للفاتورة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="product-table-body">
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <input type="text" id="product-name" placeholder="اسم المنتج" />
+                <input type="number" id="product-price" placeholder="السعر" />
+                <input type="number" id="product-quantity" placeholder="الكمية" />
+                <button onclick="addProduct()">إضافة منتج</button>
+            </div>
+        </div>
+<!-- الفاتورة -->
+<div class="bill">
+    <h3 class="center-text">الفاتورة</h3>
+    <div id="bill-items" class="bill-list"></div>
+    <div class="total">
+        الإجمالي: <span id="total-amount">0</span> جنيه
+    </div>
+    <button onclick="completeSale()">إتمام البيع</button>
+</div>
+
+
+       <!-- قسم المبيعات -->
+<div class="sales">
+    <h3 class="center-text">المبيعات السابقة</h3>
+    <div id="sales-items" class="sales-list">
+        <table>
+            <thead>
+                <tr>
+                    <th>رقم العملية</th>
+                    <th>التاريخ والوقت</th>
+                    <th>الإجمالي (ريال)</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody id="sales-table-body">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+        <!-- زر مسح جميع البيانات -->
+        <div class="reset">
+            <h3>مسح جميع البيانات</h3>
+            <input type="password" id="admin-password" placeholder="أدخل كلمة المرور" />
+            <button onclick="resetDatabase()">مسح البيانات</button>
+        </div>
+
+    </div>
+
+    <!-- Firebase Libraries -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <script>
+        // إعداد Firebase باستخدام المعلومات الخاصة بك
+        const firebaseConfig = {
+          apiKey: "AIzaSyDltuXUzqq3KP26xMbA65yn5EykNawBiS4",
+          authDomain: "system-casher.firebaseapp.com",
+          projectId: "system-casher",
+          storageBucket: "system-casher.appspot.com",
+          messagingSenderId: "1007747419272",
+          appId: "1:1007747419272:web:d4783351a032b378f7233d"
+        };
+
+        // تهيئة Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // معرف المنتج يبدأ من 0001
+        let currentProductId = 1;
+        let currentSaleId = 11;  // معرف المبيعات يبدأ من 11
+
+        // جلب المعرف الأخير المحفوظ من قاعدة البيانات
+        const productIdRef = db.ref('currentProductId');
+        productIdRef.on('value', (snapshot) => {
+            currentProductId = snapshot.val() || 1; // إذا لم يكن هناك معرف بعد، نبدأ من 1
+        });
+
+        // استرجاع المنتجات من Firebase
+        const productListRef = db.ref('products');
+        productListRef.on('value', (snapshot) => {
+            const products = snapshot.val();
+            displayProducts(products);
+        });
+
+        // استرجاع المبيعات من Firebase
+        const salesListRef = db.ref('sales');
+        salesListRef.on('value', (snapshot) => {
+            const sales = snapshot.val();
+            displaySales(sales);
+        });
+
+        // إضافة منتج جديد
+        function addProduct() {
+            const name = document.getElementById('product-name').value;
+            const price = document.getElementById('product-price').value;
+            const quantity = document.getElementById('product-quantity').value;
+
+            if (name && price && quantity) {
+                const formattedId = String(currentProductId).padStart(4, '0');
+                const newProductRef = productListRef.child(formattedId);
+                newProductRef.set({
+                    id: formattedId,
+                    name: name,
+                    price: Number(price),
+                    quantity: Number(quantity)
+                });
+
+                currentProductId++;
+                productIdRef.set(currentProductId);
+
+                document.getElementById('product-name').value = '';
+                document.getElementById('product-price').value = '';
+                document.getElementById('product-quantity').value = '';
+            }
+        }
+
+        // عرض المنتجات في الواجهة
+        function displayProducts(products) {
+            const productTableBody = document.getElementById('product-table-body');
+            productTableBody.innerHTML = '';
+            for (let key in products) {
+                const product = products[key];
+                const productRow = document.createElement('tr');
+                productRow.innerHTML = `
+                    <td>${product.id}</td>
+                    <td>${product.name}</td>
+                    <td>${product.price} جنيه</td>
+                    <td>${product.quantity}</td>
+                    <td><input type="number" id="quantity-${key}" placeholder="الكمية" max="${product.quantity}" /></td>
+                    <td><button onclick="addToBill('${key}', '${product.name}', ${product.price}, ${product.quantity})">إضافة للفاتورة</button></td>
+                `;
+                productTableBody.appendChild(productRow);
+            }
+        }
+
+        // إضافة منتج للفاتورة
+        let bill = [];
+        function addToBill(productId, name, price, availableQuantity) {
+            const quantity = document.getElementById(`quantity-${productId}`).value;
+
+            if (quantity > 0 && quantity <= availableQuantity) {
+                const billItem = {
+                    id: productId,
+                    name: name,
+                    price: price,
+                    quantity: Number(quantity)
+                };
+                bill.push(billItem);
+                displayBill();
+            } else {
+                alert('الكمية غير متاحة!');
+            }
+        }
+
+        // عرض الفاتورة
+        function displayBill() {
+            const billItemsDiv = document.getElementById('bill-items');
+            billItemsDiv.innerHTML = '';
+            let total = 0;
+            bill.forEach(item => {
+                const billItem = document.createElement('div');
+                billItem.className = 'bill-item';
+                billItem.innerHTML = `
+                    <span>${item.name}</span>
+                    <span>${item.quantity} x ${item.price} جنيه</span>
+                `;
+                billItemsDiv.appendChild(billItem);
+                total += item.quantity * item.price;
+            });
+            document.getElementById('total-amount').innerText = total;
+        }
+
+        // إتمام البيع
+        function completeSale() {
+            if (bill.length > 0) {
+                const saleRef = salesListRef.child(currentSaleId);
+                saleRef.set({
+                    items: bill,
+                    total: document.getElementById('total-amount').innerText,
+                    date: new Date().toLocaleString()
+                });
+
+                bill.forEach(item => {
+                    const productRef = productListRef.child(item.id);
+                    productRef.once('value', (snapshot) => {
+                        const product = snapshot.val();
+                        const newQuantity = product.quantity - item.quantity;
+                        productRef.update({
+                            quantity: newQuantity
+                        });
+                    });
+                });
+
+                alert('تم إتمام البيع بنجاح!');
+                bill = [];
+                currentSaleId++;
+                displayBill();
+                document.getElementById('total-amount').innerText = '0';
+                displaySales();  // تحديث عرض المبيعات
+            }
+        }
+
+    // عرض المبيعات
+function displaySales(sales) {
+    const salesTableBody = document.getElementById('sales-table-body');
+    salesTableBody.innerHTML = '';
+
+    if (sales) {
+        for (let key in sales) {
+            const sale = sales[key];
+            const saleRow = document.createElement('tr');
+            saleRow.innerHTML = `
+                <td>${key}</td>
+                <td>${sale.date}</td>
+                <td>${sale.total} جنيه</td>
+                <td>
+                    <button onclick="viewSaleDetails('${key}')">عرض التفاصيل</button>
+                    <button onclick="deleteSale('${key}')">حذف</button>
+                </td>
+            `;
+            salesTableBody.appendChild(saleRow);
+        }
+    } else {
+        salesTableBody.innerHTML = '<tr><td colspan="4" class="center-text">لا توجد مبيعات سابقة.</td></tr>';
+    }
+}
+
+        // عرض تفاصيل عملية بيع
+        function viewSaleDetails(saleId) {
+            const saleRef = salesListRef.child(saleId);
+            saleRef.once('value', (snapshot) => {
+                const sale = snapshot.val();
+                let details = 'تفاصيل العملية:\n';
+                sale.items.forEach(item => {
+                    details += `${item.name}: ${item.quantity} x ${item.price} ريال\n`;
+                });
+                alert(details);
+            });
+        }
+
+        // حذف عملية بيع
+        function deleteSale(saleId) {
+            const saleRef = salesListRef.child(saleId);
+            saleRef.once('value', (snapshot) => {
+                const sale = snapshot.val();
+                sale.items.forEach(item => {
+                    const productRef = productListRef.child(item.id);
+                    productRef.once('value', (prodSnapshot) => {
+                        const product = prodSnapshot.val();
+                        const newQuantity = product.quantity + item.quantity;  // إعادة الكمية
+                        productRef.update({
+                            quantity: newQuantity
+                        });
+                    });
+                });
+            });
+            saleRef.remove();  // حذف العملية
+            alert('تم حذف عملية البيع بنجاح!');
+            displaySales();  // تحديث عرض المبيعات
+        }
+
+        // مسح جميع البيانات
+        function resetDatabase() {
+            const password = document.getElementById('admin-password').value;
+            if (password === 'admin') {
+                const productsRef = db.ref('products');
+                const salesRef = db.ref('sales');
+                
+                // مسح جميع المنتجات
+                productsRef.remove();
+                // مسح جميع المبيعات
+                salesRef.remove();
+
+                alert('تم مسح جميع البيانات بنجاح!');
+            } else {
+                alert('كلمة المرور غير صحيحة!');
+            }
+        }
+    </script>
+
+</body>
+</html>
