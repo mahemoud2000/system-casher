@@ -139,6 +139,7 @@
     </div>
     <button onclick="completeSale()">إتمام البيع</button>
 </div>
+<button onclick="printBillList()"> طباعه</button>
 
 
        <!-- قسم المبيعات -->
@@ -150,7 +151,7 @@
                 <tr>
                     <th>رقم العملية</th>
                     <th>التاريخ والوقت</th>
-                    <th>الإجمالي (ريال)</th>
+                    <th>الإجمالي (جنيه)</th>
                     <th>الإجراءات</th>
                 </tr>
             </thead>
@@ -173,7 +174,7 @@
     <!-- Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-
+    <script src="js.js"></script>
     <script>
         // إعداد Firebase باستخدام المعلومات الخاصة بك
         const firebaseConfig = {
@@ -356,7 +357,7 @@ function displaySales(sales) {
                 const sale = snapshot.val();
                 let details = 'تفاصيل العملية:\n';
                 sale.items.forEach(item => {
-                    details += `${item.name}: ${item.quantity} x ${item.price} ريال\n`;
+                    details += `${item.name}: ${item.quantity} x ${item.price} جنيه\n`;
                 });
                 alert(details);
             });
