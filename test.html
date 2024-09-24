@@ -5,62 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام مبيعات وتخزين منتجات</title>
     <style>
-body {
-    font-family: Arial, sans-serif;
-    direction: rtl;
-    background-color: #f9f9f9;
-    margin: 0;
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            background-color: #f9f9f9;
+        }
+        .container {
+            width: 90%;
+            margin: auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .product-list, .bill, .sales {
+            margin: 20px 0;
+        }
+        h2, h3 {
+            color: #333;
+        }
+        h3 {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+        .product-item, .bill-item, .sale-item {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .product-item {
+            background-color: #f0f8ff;
+        }
+        .total {
+            font-size: 1.5em;
+            color: #007bff;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        .center-text {
+            text-align: center;
+        }
+
+        .sales-list {
+    margin-top: 20px;
 }
 
-.container {
-    max-width: 1200px; /* تعيين الحد الأقصى للعرض */
-    margin: auto;
-    padding: 20px;
-    background-color: white;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+.sales-list table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-.product-list, .bill, .sales {
-    margin: 20px 0;
-}
-
-.product-item, .bill-item, .sale-item {
+.sales-list th, .sales-list td {
     padding: 10px;
-    border: 1px solid #ccc;
-    margin-bottom: 10px;
-    display: flex;
-    flex-wrap: wrap; /* السماح للعنصر بالتفاف المحتوى */
-    justify-content: space-between;
+    border: 1px solid #ddd;
+    text-align: center;
 }
 
-button {
-    flex-basis: 100%; /* جعل الأزرار تأخذ عرض كامل عند الشاشة الصغيرة */
-    margin-top: 10px; /* إضافة مسافة بين الأزرار */
+.sales-list th {
+    background-color: #007bff;
+    color: white;
 }
 
-@media (min-width: 600px) {
-    .product-item, .bill-item, .sale-item {
-        flex-basis: 48%; /* ضبط عرض العناصر عند الشاشات الأكبر */
-    }
-
-    button {
-        flex-basis: auto; /* استعادة عرض الأزرار عند الشاشات الكبيرة */
-    }
-}
-
-@media (max-width: 600px) {
-    .container {
-        padding: 10px; /* تقليل الحواف في الشاشات الصغيرة */
-    }
-
-    h2, h3 {
-        font-size: 1.5em; /* تقليل حجم العناوين في الشاشات الصغيرة */
-    }
-
-    table {
-        font-size: 0.9em; /* تقليل حجم النص داخل الجداول */
-    }
+.sales-list td {
+    background-color: #f9f9f9;
 }
 
     </style>
@@ -104,6 +139,7 @@ button {
     </div>
     <button onclick="completeSale()">إتمام البيع</button>
 </div>
+<button onclick="printBillList()"> طباعه</button>
 
 
        <!-- قسم المبيعات -->
@@ -115,7 +151,7 @@ button {
                 <tr>
                     <th>رقم العملية</th>
                     <th>التاريخ والوقت</th>
-                    <th>الإجمالي (ريال)</th>
+                    <th>الإجمالي (جنيه)</th>
                     <th>الإجراءات</th>
                 </tr>
             </thead>
@@ -138,7 +174,7 @@ button {
     <!-- Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-
+    <script src="test.js"></script>
     <script>
         // إعداد Firebase باستخدام المعلومات الخاصة بك
         const firebaseConfig = {
@@ -321,7 +357,7 @@ function displaySales(sales) {
                 const sale = snapshot.val();
                 let details = 'تفاصيل العملية:\n';
                 sale.items.forEach(item => {
-                    details += `${item.name}: ${item.quantity} x ${item.price} ريال\n`;
+                    details += `${item.name}: ${item.quantity} x ${item.price} جنيه\n`;
                 });
                 alert(details);
             });
