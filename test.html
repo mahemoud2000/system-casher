@@ -4,101 +4,136 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام مبيعات وتخزين منتجات</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            direction: rtl;
-            background-color: #f9f9f9;
-        }
-        .container {
-            width: 90%;
-            margin: auto;
-            padding: 20px;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
-        .product-list, .bill, .sales {
-            margin: 20px 0;
-        }
+   <style>
+    body {
+        font-family: Arial, sans-serif;
+        direction: rtl;
+        background-color: #f9f9f9;
+    }
+    .container {
+        width: 90%;
+        max-width: 1200px; /* أقصى عرض */
+        margin: auto;
+        padding: 20px;
+        background-color: white;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+    .product-list, .bill, .sales {
+        margin: 20px 0;
+    }
+    h2, h3 {
+        color: #333;
+    }
+    h3 {
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        color: #007bff;
+    }
+    .product-item, .bill-item, .sale-item {
+        padding: 10px;
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap; /* السماح باللف */
+    }
+    .product-item {
+        background-color: #f0f8ff;
+    }
+    .total {
+        font-size: 1.5em;
+        color: #007bff;
+        margin-top: 20px;
+    }
+    button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s; /* تأثير الانتقال */
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+    table {
+        width: 100%;
+        margin-bottom: 20px;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+    th {
+        background-color: #007bff;
+        color: white;
+    }
+    .center-text {
+        text-align: center;
+    }
+
+    .sales-list {
+        margin-top: 20px;
+    }
+
+    .sales-list table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .sales-list th, .sales-list td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .sales-list th {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .sales-list td {
+        background-color: #f9f9f9;
+    }
+
+    @media (max-width: 768px) {
         h2, h3 {
-            color: #333;
-        }
-        h3 {
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            color: #007bff;
-        }
-        .product-item, .bill-item, .sale-item {
-            padding: 10px;
-            border: 1px solid #ccc;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-        }
-        .product-item {
-            background-color: #f0f8ff;
+            font-size: 1.5em; /* حجم النص */
         }
         .total {
-            font-size: 1.5em;
-            color: #007bff;
-            margin-top: 20px;
+            font-size: 1.2em;
         }
         button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
+            width: 100%; /* أزرار عريضة */
+            padding: 15px; /* padding أكبر */
         }
-        button:hover {
-            background-color: #0056b3;
+        .product-item, .bill-item, .sale-item {
+            flex-direction: column; /* لف العناصر عمودياً */
+            align-items: flex-start; /* محاذاة لليسار */
         }
-        table {
-            width: 100%;
-            margin-bottom: 20px;
-            border-collapse: collapse;
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding: 10px; /* تقليل padding */
+        }
+        h2, h3 {
+            font-size: 1.2em; /* تصغير حجم النص */
+        }
+        button {
+            padding: 10px; /* تصغير حجم الزر */
         }
         th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: center;
+            font-size: 0.9em; /* تصغير حجم النص في الجدول */
         }
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-        .center-text {
-            text-align: center;
-        }
+    }
+</style>
 
-        .sales-list {
-    margin-top: 20px;
-}
-
-.sales-list table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.sales-list th, .sales-list td {
-    padding: 10px;
-    border: 1px solid #ddd;
-    text-align: center;
-}
-
-.sales-list th {
-    background-color: #007bff;
-    color: white;
-}
-
-.sales-list td {
-    background-color: #f9f9f9;
-}
-
-    </style>
 </head>
 <body>
 
